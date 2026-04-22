@@ -142,7 +142,7 @@ label.lbl{display:block;font-size:11px;color:var(--muted);margin-bottom:4px;font
 <div class="card">
   <div class="card-title">📂 .3mf Datei hochladen</div>
   <div id="dropzone">
-    <input type="file" accept=".3mf" id="file-input" onchange="handleFile(this.files[0])"/>
+    <input type="file" accept=".3mf,application/octet-stream,*/*" id="file-input" onchange="handleFile(this.files[0])"/>
     <div style="font-size:32px;margin-bottom:8px">📦</div>
     <div class="drop-title">BambuLab .3mf Datei hierher ziehen</div>
     <div class="drop-sub">oder klicken · geschnitten oder ungeschnitten</div>

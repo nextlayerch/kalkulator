@@ -83,7 +83,7 @@ label.lbl{display:block;font-size:11px;color:var(--muted);margin-bottom:4px;font
 .result-sub{font-size:11px;color:var(--muted);margin-top:1px;}
 .result-row.highlight .result-label{color:var(--text);font-weight:700;}
 .result-row.highlight .result-val{color:var(--accent);}
-.result-row.discount .result-val{color:var(--red);}
+.result-row.discount .result-val{color:var(--green);}
 .result-row.tax-row .result-label{color:var(--muted);}
 .total-final{background:linear-gradient(135deg,rgba(6,182,212,.15),rgba(34,211,238,.08));border:1px solid rgba(6,182,212,.4);border-radius:var(--radius);padding:18px;text-align:center;margin-top:14px;}
 .total-label{font-size:11px;color:var(--accent2);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;}
@@ -621,10 +621,11 @@ function exportPDF(){
   if(rabattPct>0){
     var rabattAmt=pdfSubtotal*(rabattPct/100);
     pdfSubtotal-=rabattAmt;
-    doc.setFillColor(255,245,245);doc.rect(PL,y,CW,9,'F');
-    doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(200,40,40);
+    doc.setFillColor(240,255,244);doc.rect(PL,y,CW,9,'F');
+    doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(21,128,61);
     doc.text('Rabatt ('+rabattPct+'%)',PL+4,y+6);
-    doc.text('\u2212 '+chf(rabattAmt),W-PR-4,y+6.5,{align:'right'});
+    doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(21,128,61);
+    doc.text('\u2212 '+chf(rabattAmt),W-PR-3,y+6,{align:'right'});
     y+=11;
   }
   var mwstAmt=pdfSubtotal*MWST;

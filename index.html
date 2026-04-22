@@ -519,7 +519,7 @@ function renderSlots(){
   var c=document.getElementById('slots-container');
   if(!slots.length){c.innerHTML='';return;}
   c.innerHTML=slots.map(function(sl,i){
-    var opts=profiles.map(function(p){return '<option value="'+p.id+'"'+(autoMatch(sl.type)===p.id?' selected':'')+'>'+p.name+' ('+p.type+', CHF '+parseFloat(p.price).toFixed(0)+'/kg)</option>';}).join('');
+    var opts=profiles.map(function(p){return '<option value="'+p.id+'"'+(autoMatch(sl.type)===p.id?' selected':'')+'>'+p.name+' ('+p.type+', CHF '+parseFloat(p.price).toFixed(2)+'/kg)</option>';}).join('');
     var isManual=slots.length===1&&sl.manual;
     return '<div class="slot-row"><div class="slot-header">'
       +'<div class="color-swatch" style="background:'+sl.color+'"></div>'
@@ -755,15 +755,22 @@ function exportPDF(){
 
   // Save
   try{
-    var pdfData=doc.output('datauristring');
-    var a=document.createElement('a');a.href=pdfData;a.download='NextLayerCH_Offerte_'+offerNr+'_'+dateStr.replace(/\./g,'-')+'.pdf';
-    document.body.appendChild(a);a.click();document.body.removeChild(a);
-  }catch(e){
     var blob=doc.output('blob');
     var url=URL.createObjectURL(blob);
-    var a2=document.createElement('a');a2.href=url;a2.download='NextLayerCH_Offerte_'+offerNr+'_'+dateStr.replace(/\./g,'-')+'.pdf';
-    document.body.appendChild(a2);a2.click();document.body.removeChild(a2);
-    setTimeout(function(){URL.revokeObjectURL(url);},1000);
+    var a=document.createElement('a');
+    a.href=url;
+    a.download='NextLayerCH_Offerte_'+offerNr+'_'+dateStr.replace(/\./g,'-')+'.pdf';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(url);},3000);
+  }catch(e){
+    try{
+      var pdfData=doc.output('datauristring');
+      var a2=document.createElement('a');a2.href=pdfData;
+      a2.download='NextLayerCH_Offerte_'+offerNr+'_'+dateStr.replace(/\./g,'-')+'.pdf';
+      document.body.appendChild(a2);a2.click();document.body.removeChild(a2);
+    }catch(e2){
+      alert('PDF konnte nicht gespeichert werden: '+e2.message);
+    }
   }
 }
 

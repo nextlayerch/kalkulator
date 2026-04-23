@@ -167,6 +167,7 @@ label.lbl{display:block;font-size:11px;color:var(--muted);margin-bottom:4px;font
     <div class="drop-title">BambuLab .3mf Datei hierher ziehen</div>
     <div class="drop-sub">oder klicken · geschnitten oder ungeschnitten</div>
   </div>
+  <button class="btn-add" style="margin-top:10px" onclick="manualMode()">✏️ Ohne Datei – Daten manuell eingeben</button>
 </div>
 
 <div id="file-info">
@@ -343,6 +344,24 @@ var dz=document.getElementById('dropzone');
 dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('drag');});
 dz.addEventListener('dragleave',function(){dz.classList.remove('drag');});
 dz.addEventListener('drop',function(e){e.preventDefault();dz.classList.remove('drag');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0]);});
+
+function manualMode(){
+  slots=[{type:'PLA',color:'#888888',weight:0,manual:true}];
+  document.getElementById('fname').textContent='Manuelle Eingabe';
+  document.getElementById('fmeta').textContent='Druckzeit und Gewicht bitte manuell eingeben';
+  document.getElementById('file-info').style.display='flex';
+  document.getElementById('d-h').value=0;
+  document.getElementById('d-m').value=0;
+  document.getElementById('wrap-h').classList.add('hl');
+  document.getElementById('wrap-m').classList.add('hl');
+  document.getElementById('notice-ok').style.display='none';
+  document.getElementById('notice-warn').style.display='flex';
+  document.getElementById('notice-warn').textContent='✏️ Manuelle Eingabe – bitte Druckzeit und Gewicht eingeben.';
+  document.getElementById('print-data-card').style.display='block';
+  document.getElementById('results').style.display='none';
+  renderSlots();renderShipping();
+  document.getElementById('print-data-card').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
 
 function clearFile(){slots=[];['file-info','print-data-card','results'].forEach(function(i){document.getElementById(i).style.display='none';});document.getElementById('err-box').style.display='none';document.getElementById('file-input').value='';document.getElementById('dropzone').style.display='block';}
 

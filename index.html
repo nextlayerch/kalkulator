@@ -478,6 +478,20 @@ function calculate(){
     document.getElementById('r-elec').textContent=chf(eC);document.getElementById('r-wear').textContent=chf(wC);
     document.getElementById('consumable-result-rows').innerHTML=cR;
     document.getElementById('r-subtotal').textContent=chf(zwT)+(qty>1?' ('+qty+'x)':'');
+    if(qty>1){
+      var perPiece=document.getElementById('r-per-piece');
+      if(!perPiece){
+        var subRow=document.getElementById('r-subtotal').closest('.result-row');
+        var pieceDiv=document.createElement('div');
+        pieceDiv.id='r-per-piece-row';
+        pieceDiv.className='result-row';
+        pieceDiv.innerHTML='<span class="result-label" style="color:var(--muted)">↳ Stückpreis (1x)</span><span class="result-val" id="r-per-piece" style="color:var(--muted)">–</span>';
+        subRow.parentNode.insertBefore(pieceDiv,subRow.nextSibling);
+      }
+      document.getElementById('r-per-piece').textContent=chf(zwT/qty);
+    } else {
+      var pr=document.getElementById('r-per-piece-row');if(pr)pr.remove();
+    }
     var rRow=document.getElementById('r-rabatt-row');
     if(rp>0){rRow.style.display='flex';document.getElementById('r-rabatt-label').textContent='Rabatt ('+rp+'%)'+(rc?' – '+rc:'');document.getElementById('r-rabatt').textContent='- '+chf(rAmt);}else rRow.style.display='none';
     document.getElementById('r-mwst-row').style.display=mwst?'flex':'none';
@@ -593,6 +607,13 @@ async function exportPDF(){
     doc.setFillColor(LB[0],LB[1],LB[2]);doc.rect(PL,y,CW,9,'F');
     doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(DT[0],DT[1],DT[2]);
     doc.text('Zwischentotal'+(qty>1?' ('+qty+'x)':''),PL+4,y+6);doc.text(chf(pSub),W-PR-3,y+6,{align:'right'});y+=11;
+    if(qty>1){
+      doc.setFillColor(249,250,251);doc.rect(PL,y,CW,8,'F');
+      doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(MU[0],MU[1],MU[2]);
+      doc.text('Stuckpreis (1x)',PL+6,y+5.5);
+      doc.text(chf(pSub/qty),W-PR-3,y+5.5,{align:'right'});
+      y+=10;
+    }
 
     if(rp>0){
       var rAmt=pSub*(rp/100);pSub-=rAmt;

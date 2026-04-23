@@ -225,6 +225,7 @@ label.lbl{display:block;font-size:11px;color:var(--muted);margin-bottom:4px;font
       <div class="total-sub" id="r-sub"></div>
     </div>
     <button class="pdf-btn" onclick="exportPDF()">📄 PDF exportieren</button>
+    <button class="pdf-btn" style="margin-top:6px;border-color:var(--yellow);color:var(--yellow)" onclick="testPDF()">🔍 PDF Diagnose</button>
   </div>
 </div>
 
@@ -598,6 +599,32 @@ function calculate(){
   document.getElementById('r-sub').textContent=mwstAktiv?'Zwischentotal '+chf(afterRabatt)+' + MwSt 8.1%':'Betrag exkl. MwSt';
   document.getElementById('results').style.display='block';
   document.getElementById('results').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+window.onerror=function(msg,src,line,col,err){
+  console.error('JS ERROR:',msg,'at',src,line+':'+col);
+};
+
+function testPDF(){
+  var lines=[];
+  lines.push('window.jspdf: '+(typeof window.jspdf));
+  lines.push('jsPDF class: '+(window.jspdf&&window.jspdf.jsPDF?'OK':'MISSING'));
+  lines.push('JSZip: '+(typeof JSZip));
+  lines.push('exportPDF: '+(typeof exportPDF));
+  lines.push('calculate: '+(typeof calculate));
+  try{
+    var doc=new window.jspdf.jsPDF({unit:'mm',format:'a4'});
+    doc.text('Test',10,10);
+    var blob=doc.output('blob');
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url;a.download='test.pdf';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    lines.push('PDF-Download: OK');
+  }catch(e){
+    lines.push('PDF-Fehler: '+e.message);
+  }
+  alert(lines.join('\n'));
 }
 
 function exportPDF(){

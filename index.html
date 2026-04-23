@@ -562,10 +562,6 @@ async function exportPDF(){
     var rp=parseFloat(document.getElementById('d-rabatt').value)||0;
     var rc=document.getElementById('d-rabatt-comment').value.trim();
     var mwst=document.getElementById('d-mwst').checked;
-    var dateStr=new Date().toLocaleDateString('de-CH',{day:'2-digit',month:'2-digit',year:'numeric'});
-    offerNr++; ST.set(SK_N,String(offerNr));
-    var oNr='ONL-'+offerNr;
-
     // Header
     doc.setDrawColor(cy[0],cy[1],cy[2]);doc.setLineWidth(0.8);doc.line(PL,y+10,W-PR,y+10);
     if(logoBase64){

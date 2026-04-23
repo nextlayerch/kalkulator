@@ -193,6 +193,9 @@ label.lbl{display:block;font-size:11px;color:var(--muted);margin-bottom:4px;font
     <label class="lbl">Rabatt (optional)</label>
     <div class="iw"><input type="number" id="d-rabatt" value="0" min="0" max="100" step="1"/><span class="unit">%</span></div>
   </div>
+  <div style="margin-top:8px" id="d-rabatt-comment-wrap">
+    <div class="iw"><input type="text" id="d-rabatt-comment" placeholder="z.B. Familien & Freunde Rabatt" style="font-size:13px;font-weight:400"/></div>
+  </div>
   <div style="margin-top:12px;display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:11px 14px;cursor:pointer" onclick="document.getElementById('d-mwst').click()">
     <input type="checkbox" id="d-mwst" checked style="accent-color:var(--accent);width:16px;height:16px;cursor:pointer" onclick="event.stopPropagation()"/>
     <div>
@@ -428,6 +431,7 @@ function calculate(){
     var wear=parseFloat(document.getElementById('s-wear').value)||0;
     var mu=parseFloat(document.getElementById('s-markup').value)||0;
     var rp=parseFloat(document.getElementById('d-rabatt').value)||0;
+    var rc=document.getElementById('d-rabatt-comment').value.trim();
     var mwst=document.getElementById('d-mwst').checked;
     var mf=1+mu/100;
 
@@ -475,7 +479,7 @@ function calculate(){
     document.getElementById('r-subtotal').textContent=chf(zwT);
 
     var rRow=document.getElementById('r-rabatt-row');
-    if(rp>0){rRow.style.display='flex';document.getElementById('r-rabatt-label').textContent='Rabatt ('+rp+'%)';document.getElementById('r-rabatt').textContent='- '+chf(rAmt);}
+    if(rp>0){rRow.style.display='flex';document.getElementById('r-rabatt-label').textContent='Rabatt ('+rp+'%)'+(rc?' – '+rc:'');document.getElementById('r-rabatt').textContent='- '+chf(rAmt);}
     else rRow.style.display='none';
 
     document.getElementById('r-mwst-row').style.display=mwst?'flex':'none';
@@ -515,7 +519,7 @@ async function exportPDF(){
     var tH=dh+dm/60;
     var mf=1+(parseFloat(document.getElementById('s-markup').value)||0)/100;
     var rp=parseFloat(document.getElementById('d-rabatt').value)||0;
-    var mwst=document.getElementById('d-mwst').checked;
+    var rc=document.getElementById('d-rabatt-comment').value.trim();
     var dateStr=new Date().toLocaleDateString('de-CH',{day:'2-digit',month:'2-digit',year:'numeric'});
     offerNr++; ST.set(SK_N,String(offerNr));
     var oNr='ONL-'+offerNr;
@@ -569,7 +573,10 @@ async function exportPDF(){
 
     y+=4;
     sumRow('Zwischentotal',chf(pSub),null);
-    if(rp>0){var rAmt=pSub*(rp/100);pSub-=rAmt;doc.setFillColor(240,255,244);doc.rect(PL,y,CW,9,'F');doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(21,128,61);doc.text('Rabatt ('+rp+'%)',PL+4,y+6);doc.text('- '+chf(rAmt),W-PR-3,y+6,{align:'right'});y+=11;}
+    if(rp>0){var rAmt=pSub*(rp/100);pSub-=rAmt;
+      var rLabel='Rabatt ('+rp+'%)'+(rc?' - '+rc:'');
+      doc.setFillColor(240,255,244);doc.rect(PL,y,CW,9,'F');doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(21,128,61);
+      doc.text(rLabel,PL+4,y+6);doc.text('- '+chf(rAmt),W-PR-3,y+6,{align:'right'});y+=11;}
     if(mwst){var mA=pSub*MWST;sumRow('MwSt 8.1%',chf(mA),null);pSub+=mA;}
 
     doc.setFillColor(lb[0],lb[1],lb[2]);doc.roundedRect(PL,y,CW,14,2,2,'F');

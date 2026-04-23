@@ -601,8 +601,13 @@ function calculate(){
 }
 
 function exportPDF(){
-  if(!window.jspdf){alert('PDF-Bibliothek laedt noch, bitte kurz warten.');return;}
-  var doc=new window.jspdf.jsPDF({unit:'mm',format:'a4'});
+  if(!window.jspdf||!window.jspdf.jsPDF){
+    alert('Fehler: jsPDF nicht geladen.\njspdf: '+(typeof window.jspdf)+'\nNavigator: '+navigator.userAgent);
+    return;
+  }
+  var doc;
+  try{doc=new window.jspdf.jsPDF({unit:'mm',format:'a4'});}
+  catch(e){alert('Fehler beim Erstellen des PDF-Dokuments: '+e.message);return;}
   var W=210,PL=18,PR=18,CW=W-PL-PR;
   var y=16;
   var cyan=[6,182,212],dark=[14,116,144],dt=[30,32,40],mu=[120,130,140],lbg=[240,253,255];

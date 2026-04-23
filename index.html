@@ -133,7 +133,15 @@ label.lbl{display:block;font-size:11px;color:var(--muted);margin-bottom:4px;font
 </div>
 
 <div class="card">
-  <div class="card-title">🧵 Filament-Profile <button class="tog" onclick="toggleSection('s-profiles',this)">Einklappen</button></div>
+  <div class="card-title">👤 Kundendaten <button class="tog" onclick="toggleSection('s-customer',this)">Einklappen</button></div>
+  <div id="s-customer">
+    <div class="grid2">
+      <div style="grid-column:1/-1"><label class="lbl">Name</label><div class="iw"><input type="text" id="c-name" placeholder="z.B. Max Mustermann"/></div></div>
+      <div><label class="lbl">E-Mail</label><div class="iw"><input type="email" id="c-email" placeholder="max@beispiel.ch"/></div></div>
+      <div><label class="lbl">Adresse</label><div class="iw"><input type="text" id="c-address" placeholder="Musterstrasse 1, 5000 Aarau"/></div></div>
+    </div>
+  </div>
+</div>
   <div id="s-profiles">
     <div id="profile-form" style="display:none"></div>
     <div class="profile-list" id="profile-list"></div>
@@ -196,6 +204,14 @@ label.lbl{display:block;font-size:11px;color:var(--muted);margin-bottom:4px;font
   </div>
   <div style="margin-top:8px" id="d-rabatt-comment-wrap">
     <div class="iw"><input type="text" id="d-rabatt-comment" placeholder="z.B. Familien & Freunde Rabatt" style="font-size:13px;font-weight:400"/></div>
+  </div>
+  <div style="margin-top:12px">
+    <label class="lbl">Stückzahl</label>
+    <div class="iw"><input type="number" id="d-qty" value="1" min="1" step="1"/><span class="unit">Stk.</span></div>
+  </div>
+  <div style="margin-top:12px">
+    <label class="lbl">Bemerkungen (erscheint auf Offerte)</label>
+    <div class="iw" style="align-items:flex-start"><textarea id="d-notes" placeholder="z.B. Lieferzeit 3-5 Werktage" style="background:none;border:none;outline:none;color:var(--text);font-size:13px;font-weight:400;padding:9px 10px;flex:1;min-height:70px;resize:vertical;font-family:inherit"></textarea></div>
   </div>
   <div style="margin-top:12px;display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:11px 14px;cursor:pointer" onclick="document.getElementById('d-mwst').click()">
     <input type="checkbox" id="d-mwst" checked style="accent-color:var(--accent);width:16px;height:16px;cursor:pointer" onclick="event.stopPropagation()"/>
@@ -449,9 +465,15 @@ function calculate(){
     var watt=parseFloat(document.getElementById('s-watt').value)||0;
     var wear=parseFloat(document.getElementById('s-wear').value)||0;
     var mu=parseFloat(document.getElementById('s-markup').value)||0;
+    var qty=Math.max(1,parseInt(document.getElementById('d-qty').value)||1);
+    var qty=Math.max(1,parseInt(document.getElementById('d-qty').value)||1);
     var rp=parseFloat(document.getElementById('d-rabatt').value)||0;
     var rc=document.getElementById('d-rabatt-comment').value.trim();
     var mwst=document.getElementById('d-mwst').checked;
+    var notes=document.getElementById('d-notes').value.trim();
+    var cName=document.getElementById('c-name').value.trim();
+    var cEmail=document.getElementById('c-email').value.trim();
+    var cAddr=document.getElementById('c-address').value.trim();
     var mf=1+mu/100;
 
     var fT=0,fR='';
@@ -485,7 +507,7 @@ function calculate(){
     if(shObj&&shC>0){shRow.style.display='flex';document.getElementById('r-shipping').textContent=chf(shC);}
     else shRow.style.display='none';
 
-    var zwT=fT+eC+wC+cT+shC;
+    var zwT=(fT+eC+wC+cT+shC)*qty;
     var rAmt=zwT*(rp/100);
     var afR=zwT-rAmt;
     var mwstAmt=mwst?afR*MWST:0;
@@ -495,7 +517,7 @@ function calculate(){
     document.getElementById('r-elec').textContent=chf(eC);
     document.getElementById('r-wear').textContent=chf(wC);
     document.getElementById('consumable-result-rows').innerHTML=cR;
-    document.getElementById('r-subtotal').textContent=chf(zwT);
+    document.getElementById('r-subtotal').textContent=chf(zwT)+(qty>1?' ('+qty+'x)':'');
 
     var rRow=document.getElementById('r-rabatt-row');
     if(rp>0){rRow.style.display='flex';document.getElementById('r-rabatt-label').textContent='Rabatt ('+rp+'%)'+(rc?' – '+rc:'');document.getElementById('r-rabatt').textContent='- '+chf(rAmt);}
@@ -569,6 +591,25 @@ async function exportPDF(){
     function sumRow(l,v,clr){doc.setFillColor(lb[0],lb[1],lb[2]);doc.rect(PL,y,CW,9,'F');doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(clr?clr[0]:dt[0],clr?clr[1]:dt[1],clr?clr[2]:dt[2]);doc.text(l,PL+4,y+6);doc.text(v,W-PR-3,y+6,{align:'right'});y+=11;}
 
     var pSub=0;
+    // Customer block
+    if(cName||cEmail||cAddr){
+      doc.setFillColor(lb[0],lb[1],lb[2]);doc.roundedRect(PL,y,CW,cAddr&&cEmail?16:cAddr||cEmail?12:8,2,2,'F');
+      doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(dk[0],dk[1],dk[2]);
+      var cy2=y+6;
+      if(cName){doc.text(cName,PL+4,cy2);cy2+=5;}
+      doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(mu[0],mu[1],mu[2]);
+      if(cEmail){doc.text(cEmail,PL+4,cy2);cy2+=4;}
+      if(cAddr){doc.text(cAddr,PL+4,cy2);}
+      y+=(cAddr&&cEmail?20:cAddr||cEmail?16:12);
+    }
+
+    // Qty badge
+    if(qty>1){
+      doc.setFillColor(cy[0],cy[1],cy[2]);doc.roundedRect(W-PR-22,y-14,22,7,2,2,'F');
+      doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(255,255,255);
+      doc.text(qty+'x Stk.',W-PR-11,y-9,{align:'center'});
+    }
+
     sec('Filament');
     slots.forEach(function(_,i){
       var pel=document.getElementById('sl-p-'+i);var wel=document.getElementById('sl-w-'+i);
@@ -577,8 +618,11 @@ async function exportPDF(){
       row(slots.length>1?'Slot '+(i+1)+' - '+slots[i].type:'Filament',pr?wg.toFixed(1)+' g - '+pr.name:'Kein Profil',chf(pc),i%2===1);
     });
 
+    // Multiply by qty
+    pSub=pSub*qty;
+
     y+=2;sec('Betriebskosten');
-    var eCP=(watt/1000)*tH*elecP*mf;var wCP=tH*wearP*mf;pSub+=eCP+wCP;
+    var eCP=(watt/1000)*tH*elecP*mf*qty;var wCP=tH*wearP*mf*qty;pSub+=eCP+wCP;
     row('Stromkosten',watt+'W x '+tStr,chf(eCP),false);
     row('Maschinenverschleiss',tStr,chf(wCP),true);
 
@@ -604,6 +648,34 @@ async function exportPDF(){
     doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(dk[0],dk[1],dk[2]);doc.text(mwst?'Total inkl. MwSt':'Total',PL+5,y+9);
     doc.setFontSize(14);doc.setTextColor(cy[0],cy[1],cy[2]);doc.text(chf(pSub),W-PR-5,y+9.5,{align:'right'});
     y+=19;
+
+    // Notes
+    if(notes){
+      doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(dk[0],dk[1],dk[2]);
+      doc.text('Bemerkungen',PL,y);y+=5;
+      doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(mu[0],mu[1],mu[2]);
+      var lines=doc.splitTextToSize(notes,CW);
+      doc.text(lines,PL,y);y+=lines.length*4+6;
+    }
+
+    // QR Code (via Google Charts API)
+    try{
+      var qrUrl='https://chart.googleapis.com/chart?cht=qr&chs=80x80&chl='+encodeURIComponent('https://nextlayer-ch.store')+'&choe=UTF-8';
+      var qrImg=await new Promise(function(res,rej){
+        var img=new Image();img.crossOrigin='anonymous';
+        img.onload=function(){
+          var cv=document.createElement('canvas');cv.width=80;cv.height=80;
+          cv.getContext('2d').drawImage(img,0,0);res(cv.toDataURL('image/png'));
+        };
+        img.onerror=function(){res(null);};
+        img.src=qrUrl;
+      });
+      if(qrImg){
+        doc.addImage(qrImg,'PNG',W-PR-18,y-2,18,18);
+        doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(mu[0],mu[1],mu[2]);
+        doc.text('nextlayer-ch.store',W-PR-9,y+19,{align:'center'});
+      }
+    }catch(e){}
 
     doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(mu[0],mu[1],mu[2]);
     doc.text('Offerte gueltig fuer 30 Tage ab Ausstelldatum ('+dateStr+').',PL,y);y+=10;
